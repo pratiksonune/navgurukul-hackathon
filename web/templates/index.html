@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Interview Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .metric-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #e53e3e;
+        }
+        
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .content-card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .content-box {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+        
+        .empty-state {
+            color: #a0aec0;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .conversation-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .user-message {
+            background: #ebf4ff;
+            margin-left: 30px;
+        }
+        
+        .ai-message {
+            background: #e6fffa;
+            margin-right: 30px;
+        }
+        
+        .message-header {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .filler-item {
+            background: #faf5ff;
+            border: 2px solid #e9d8fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-recording {
+            background: #f56565;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .status-ready {
+            background: #48bb78;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .features {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature-item {
+            padding: 20px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .feature-desc {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .streaming-text {
+            color: #667eea;
+            font-style: italic;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .final-text {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI Voice Interview Assistant</h1>
+            <p>Ultra-lightweight client-side AI for real-time interview summaries</p>
+        </div>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Model Load Time</div>
+                <div class="metric-value" id="loadTime">-</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Inference Time</div>
+                <div class="metric-value" id="inferenceTime">-</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Model Size</div>
+                <div class="metric-value" id="modelSize">-</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Status</div>
+                <div class="metric-value">
+                    <span class="status-indicator status-ready"></span>
+                    <span id="status">Ready</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="button-group">
+                <button id="startBtn" class="btn-primary" onclick="startInterview()">
+                    Start Interview
+                </button>
+                <button id="stopBtn" class="btn-danger" onclick="stopInterview()" disabled>
+                    Stop Interview
+                </button>
+                <button id="downloadBtn" class="btn-success" onclick="downloadReport()">
+                    Download Report
+                </button>
+            </div>
+        </div>
+        
+        <div class="content-grid">
+            <div class="content-card">
+                <h2>Live Transcript (Streaming)</h2>
+                <div class="content-box" id="transcript">
+                    <p class="empty-state">Start speaking to see transcript...</p>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h2>Real-time Summary</h2>
+                <div class="content-box" id="summary">
+                    <p class="empty-state">Summary will appear here...</p>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h2>Conversation Log</h2>
+                <div class="content-box" id="conversation">
+                    <p class="empty-state">Conversation will appear here...</p>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h2>Generated Fillers</h2>
+                <div class="content-box" id="fillers">
+                    <p class="empty-state">Contextual fillers will appear here...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features">
+            <h2 style="text-align: center; margin-bottom: 10px;">Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="feature-title">Ultra-Fast Inference</div>
+                    <div class="feature-desc">Less than 50ms inference time for real-time summarization</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">Lightweight Model</div>
+                    <div class="feature-desc">Under 30MB - runs entirely in your browser</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">Privacy First</div>
+                    <div class="feature-desc">100% offline capable - data never leaves your device</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">Real-time Streaming</div>
+                    <div class="feature-desc">See text appear as you speak with live transcription</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let recognition;
+        let isRecording = false;
+        let finalTranscript = '';
+        let conversationLog = [];
+        let fillerPhrases = [];
+        let processingTimeout = null;
+        
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            
+            recognition.onresult = handleSpeechResult;
+            recognition.onerror = handleSpeechError;
+            recognition.onend = handleSpeechEnd;
+        }
+        
+        window.onload = async function() {
+            try {
+                const response = await fetch('/api/model_info');
+                const data = await response.json();
+                
+                document.getElementById('modelSize').textContent = data.model_size_mb.toFixed(1) + 'MB';
+                document.getElementById('loadTime').textContent = data.model_load_time_ms.toFixed(0) + 'ms';
+            } catch (error) {
+                console.error('Error loading model info:', error);
+            }
+        };
+        
+        function startInterview() {
+            if (!recognition) {
+                alert('Speech recognition not supported in this browser. Please use Chrome or Edge.');
+                return;
+            }
+            
+            try {
+                recognition.start();
+                isRecording = true;
+                
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                document.getElementById('status').textContent = 'Recording';
+                document.querySelector('.status-indicator').className = 'status-indicator status-recording';
+            } catch (error) {
+                console.error('Error starting recognition:', error);
+            }
+        }
+        
+        function stopInterview() {
+            if (recognition && isRecording) {
+                recognition.stop();
+            }
+            
+            isRecording = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('status').textContent = 'Ready';
+            document.querySelector('.status-indicator').className = 'status-indicator status-ready';
+        }
+        
+        function handleSpeechEnd() {
+            if (isRecording) {
+                try {
+                    recognition.start();
+                } catch (error) {
+                    console.error('Error restarting recognition:', error);
+                }
+            }
+        }
+        
+        async function handleSpeechResult(event) {
+            let interimTranscript = '';
+            let newFinalTranscript = '';
+            
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcriptText = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    newFinalTranscript += transcriptText + ' ';
+                } else {
+                    interimTranscript += transcriptText;
+                }
+            }
+            
+            // Update transcript display with streaming text
+            const transcriptDiv = document.getElementById('transcript');
+            let displayText = '';
+            
+            if (finalTranscript) {
+                displayText += '<span class="final-text">' + finalTranscript + '</span>';
+            }
+            
+            if (interimTranscript) {
+                displayText += '<span class="streaming-text">' + interimTranscript + '</span>';
+            }
+            
+            if (displayText) {
+                transcriptDiv.innerHTML = '<p>' + displayText + '</p>';
+            } else {
+                transcriptDiv.innerHTML = '<p class="empty-state">Start speaking to see transcript...</p>';
+            }
+            
+            // Auto-scroll to bottom
+            transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+            
+            // Process final transcript
+            if (newFinalTranscript) {
+                finalTranscript += newFinalTranscript;
+                
+                // Add to conversation log
+                addToConversation('user', newFinalTranscript.trim());
+                
+                // Clear previous timeout
+                if (processingTimeout) {
+                    clearTimeout(processingTimeout);
+                }
+                
+                // Process after 1 second of silence (debounce)
+                processingTimeout = setTimeout(async () => {
+                    await processText(finalTranscript);
+                }, 1000);
+            }
+        }
+        
+        async function processText(text) {
+            try {
+                const response = await fetch('/api/process_conversation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                
+                const data = await response.json();
+                
+                // Update summary
+                document.getElementById('summary').innerHTML = '<p>' + data.summary + '</p>';
+                
+                // Add filler
+                if (data.should_pause) {
+                    addFiller(data.filler);
+                    addToConversation('ai', data.filler);
+                    speakText(data.filler);
+                }
+                
+                // Update metrics
+                document.getElementById('inferenceTime').textContent = 
+                    data.metrics.summary_inference_time.toFixed(1) + 'ms';
+                
+            } catch (error) {
+                console.error('Error processing text:', error);
+            }
+        }
+        
+        function addToConversation(type, text) {
+            const timestamp = new Date().toLocaleTimeString();
+            conversationLog.push({ type, text, timestamp });
+            
+            const conversationDiv = document.getElementById('conversation');
+            const messageClass = type === 'user' ? 'user-message' : 'ai-message';
+            const label = type === 'user' ? 'USER' : 'AI';
+            
+            conversationDiv.innerHTML += `
+                <div class="conversation-item ${messageClass}">
+                    <div class="message-header">${label} - ${timestamp}</div>
+                    <div>${text}</div>
+                </div>
+            `;
+            
+            conversationDiv.scrollTop = conversationDiv.scrollHeight;
+        }
+        
+        function addFiller(text) {
+            fillerPhrases.push(text);
+            
+            const fillersDiv = document.getElementById('fillers');
+            fillersDiv.innerHTML = fillerPhrases.map(filler => 
+                `<div class="filler-item">${filler}</div>`
+            ).join('');
+            
+            fillersDiv.scrollTop = fillersDiv.scrollHeight;
+        }
+        
+        function speakText(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            window.speechSynthesis.speak(utterance);
+        }
+        
+        function handleSpeechError(event) {
+            console.error('Speech recognition error:', event.error);
+            if (event.error === 'no-speech') {
+                // Ignore no-speech errors, they're common
+                return;
+            }
+            if (event.error === 'aborted') {
+                // Ignore aborted errors during restart
+                return;
+            }
+            stopInterview();
+        }
+        
+        function downloadReport() {
+            const report = {
+                transcript: finalTranscript,
+                conversationLog,
+                fillerPhrases,
+                timestamp: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `interview-report-${Date.now()}.json`;
+            a.click();
+        }
+    </script>
+</body>
+</html>
